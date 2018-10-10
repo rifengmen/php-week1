@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻列表</title>
+    <link rel="stylesheet" href="../pub/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <div class="panel panel-info">
+                <div class="panel-heading">AJAX</div>
+            </div>
+            <ul class="list-group">1111111</ul>
+            <ul class="list-group">2222222</ul>
+            <ul class="list-group">3333333</ul>
+            <div class="nav nav-tabs">
+                <button type="button" class="btn btn-primary" name="skill">技术界</button>
+                <button type="button" class="btn btn-success" name="yule">娱乐圈</button>
+                <button type="button" class="btn btn-info" name="tiyu">体育档</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+<script src="../pub/jquery-3.3.1.min.js"></script>
+<script>
+    $(function () {
+        let listGroup = $(".list-group");
+        let flag = {};
+        // 获取所有按钮集合绑定单击事件
+        $("button").click(function () {
+            let index = $(this).index();
+            listGroup.css({"display":"none"}).eq(index).css({"display":"block"});
+            let names = $(this).attr("name");
+            if (flag[names]){return};
+            $.ajax({
+                type: "GET",
+                url: "news.php",
+                data: {t:names},  // t=names
+                dataType: "json",
+                success: function (v) {
+                    flag[names] = true;
+                    console.log(v);
+                    updata(listGroup[index],v);
+                }
+            })
+
+            // 原生写法
+            // // 获取自定义属性name的值写入打开请求的地址
+            // let names = `news.php?t=${$(this).attr('name')}`;
+            // // 实例化一个xml
+            // let xml = new XMLHttpRequest();
+            // // 打开请求
+            // xml.open("get",names,true);
+            // // 发送
+            // xml.send();
+            // // 监测状态
+            // xml.onreadystatechange = function () {
+            //     // 服务器是否接受        请求是否完成
+            //     if (xml.readyState == 4 && xml.status == 200) {
+            //         // 将数据转换格式，以便使用
+            //         let data = JSON.parse(xml.responseText);
+            //         // 调用函数
+            //         updata(data);
+            //     }
+            // }
+
+
+
+        });
+        $("button").triggerHandler("click");
+        // 声明函数
+        function updata(ele,val) {
+            // 表格清空
+            $(ele).html("");
+            // 遍历传入的数据
+            $.each(val,function (i, v) {
+                // 将数据套入模板字符串中
+                let str = `<li class="list-group-item">${v.title}</li>`;
+                // 将模板字符串写入表格中
+                $(ele).append(str);
+            })
+        }
+    })
+</script>
+</html>
