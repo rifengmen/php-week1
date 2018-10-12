@@ -1,81 +1,61 @@
 $(function () {
     // 获取表格身体部分
     let table = $("tbody");
-
-
-    // 导入数据库数据
+    // 获取数据库数据打印到页面
     $.ajax({
-        url: "table2.php",
-        dataType: "json",
-        success: function (res) {
+        type:"GET",
+        url:"table.php",
+        dataType:"json",
+        success:function (res) {
             render(res);
         }
-    });
-
-
+    })
     // 修改数据
-    // 事件委派给父元素绑定双击事件，筛选掉删除按钮
-    table.on("dblclick","td:not(button)",function () {
-        // 获取选中部分
-        let tds = $(this);
-        // 获取选中部分所在的行
-        let id = tds.closest("tr").attr("id");
-        // 获取选中部分所在的字段
-        let key = tds.closest("td").attr("type");
-        // 获取选中部分的文本
-        let oldval = tds.text();
-        // 清空选中部分的文本
-        tds.empty();
-        // 创建一个输入框
-        let inputs = $("<input>");
-        //
-        tds.append(inputs);
-        inputs.val(oldval).blur(function () {
-            let nval = inputs.val();
-            inputs.remove();
-            tds.text(nval);
-            update(id,key,nval)
-        });
+    table.on("dblclick","td:not(.del)",function () {
+        let td = $(this);
+        let oval = td.html();
+        let id = td.closest("tr").attr("id");
+        let key = td.closest("td").attr("type");
+        td.empty();
+        let input = $("<input>");
+        input.appendTo(td).val(oval).blur(function () {
+            let nval = input.val();
+            input.remove();
+            td.html(nval);
+            update(id,key,nval);
+        })
     });
-
-
     // 删除数据
-    table.on("click","td button",function (e) {
+    table.on('click','td button',function (e) {
         e.stopPropagation();
         let tr = $(this).closest("tr");
         let id = tr.attr("id");
-        $.ajax({
-            url: "del.php",
-            data: {id:id},
-            success: function (res) {
-                if (res == "yes") {
-                    tr.remove();
-                }
-                else if (res == "no") {
-                    alert("删除失败");
-                }
+        $.get('del.php',{id:id},function (res) {
+            if (res == "yes") {
+                tr.remove();
             }
-        });
+            else if (res == "no") {
+                alert ("删除失败");
+            }
+        })
     })
-
-
-    // 插入新的表格
+    // 添加数据
     $("button.button").click(function () {
-        $.get("add.php",function (res) {
+        $.get('add.php',function (res) {
             if (res == 0) {
                 alert("添加失败");
             }
             else {
                 let str = `<tr id="${res}">
-                               <td type="name">张三</td>
-                               <td type="age">0</td>
-                               <td type="sex"></td>
-                               <td type="phone"></td>
-                               <td type="address"></td>
-                               <td class="del">
-                                   <button type="button" class="btn btn-primary">删除</button>
-                               </td>
-                           </tr>`;
+                          <td type="name">张三</td>
+                          <td type="age">0</td>
+                          <td type="sex"></td>
+                          <td type="phone"></td>
+                          <td type="address"></td>
+                          <td class="del">
+                              <button type="button" class="btn btn-primary">删除</button>
+                          </td>
+                      </tr>`;
                 table.append(str);
             }
         })
@@ -83,36 +63,31 @@ $(function () {
 
 
     // 函数部分
-    // 修改
-    function update(id, key, value) {
-        $.ajax({
-            url: "update.php",
-            data: {id:id,key:key,value:value},
-            success: function (res) {
-                if (res == "yes") {
-                    alert("修改成功");
-                }
-                else if (res == "no") {
-                    alert("修改失败");
-                }
+    // 获取数据库数据打印到页面
+    function render(val) {
+        $.each($(val),function (i, v) {
+            let str = `<tr id="${v.id}">
+                          <td type="name">${v.name}</td>
+                          <td type="age">${v.age}</td>
+                          <td type="sex">${v.sex}</td>
+                          <td type="phone">${v.phone}</td>
+                          <td type="address">${v.address}</td>
+                          <td class="del">
+                              <button type="button" class="btn btn-primary">删除</button>
+                          </td>
+                      </tr>`;
+            table.append(str);
+        })
+    };
+    // 修改数据库数据函数
+    function update(id,key,value) {
+        $.get("update.php",{id:id,key:key,value:value},function (res) {
+            if (res == "yes") {
+                alert("修改成功");
+            }
+            else if (res == "no") {
+                alert("修改失败");
             }
         })
     };
-    // 导入
-    function render(students) {
-        students.forEach(val => {
-            let str = `<tr id="${val.id}">
-                           <td type="name">${val.name}</td>
-                           <td type="age">${val.age}</td>
-                           <td type="sex">${val.sex}</td>
-                           <td type="phone">${val.phone}</td>
-                           <td type="address">${val.address}</td>
-                           <td class="del">
-                               <button type="button" class="btn btn-primary">删除</button>
-                           </td>
-                       </tr>`;
-            table.append(str);
-        });
-    };
-});
-
+})

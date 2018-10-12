@@ -4,7 +4,7 @@
 $mysql = new mysqli('localhost','root','','studentstable','3306');
 // 如果错误返回报错信息，并终止
 if ($mysql -> connect_errno) {
-    echo "数据库连接失败，失败原因是" . $mysql -> connect_erron;
+    echo "数据库连接失败，失败原因是" . $mysql -> connect_errno;
     exit();
 };
 // 查询字符集

@@ -1,5 +1,4 @@
 <?php
-
 include_once'../pub/publics.php';
 $sql = "insert into students (age,sex,phone,address) value ('0','','','')";
 $mysql -> query($sql);
